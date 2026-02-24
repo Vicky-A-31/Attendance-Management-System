@@ -156,15 +156,61 @@ const sendWhatsApp = async (to, message, metadata = {}) => {
 };
 
 /**
- * Create absence notification message
+ * Create SMS absence message (Bilingual: Tamil + English)
  */
-const createAbsenceMessage = (student, period, date) => {
+const createAbsenceSMSMessage = (student, period, date) => {
   const dateStr = new Date(date).toLocaleDateString('en-IN', {
     day: '2-digit',
     month: 'short',
     year: 'numeric'
   });
-  return `Alert: ${student.name} (Roll: ${student.rollNo}) was ABSENT in Period ${period} on ${dateStr}. - ${COLLEGE_NAME}`;
+  return `${COLLEGE_NAME}
+வருகை இல்லாத அறிவிப்பு | Absence Alert:
+மாணவர்: ${student.name} (சேர்க்கை எண்: ${student.rollNo})
+இன்று (${dateStr}) Period ${period}-ல் வகுப்பில் கலந்துகொள்ளவில்லை.
+Student: ${student.name} (Roll: ${student.rollNo}) was ABSENT in Period ${period} on ${dateStr}.`;
+};
+
+/**
+ * Create WhatsApp absence message (Bilingual: Tamil + English)
+ */
+const createAbsenceWhatsAppMessage = (student, period, date) => {
+  const dateStr = new Date(date).toLocaleDateString('en-IN', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  });
+  const dayStr = new Date(date).toLocaleDateString('en-IN', { weekday: 'long' });
+
+  return `🏫 *${COLLEGE_NAME}*
+━━━━━━━━━━━━━━━━━━━━
+⚠️ *வருகை இல்லாத அறிவிப்பு | Absence Alert*
+━━━━━━━━━━━━━━━━━━━━
+
+அன்பான பெற்றோர் / Dear Parent,
+
+உங்கள் மகன்/மகள் இன்று வகுப்பில் கலந்துகொள்ளவில்லை என தெரிவிக்கப்படுகிறது.
+Your ward was marked *ABSENT* today.
+
+👤 *மாணவர் பெயர் | Student:* ${student.name}
+🔢 *சேர்க்கை எண் | Roll No:* ${student.rollNo}
+🏛️ *துறை | Department:* ${student.department}
+📅 *வகுப்பு ஆண்டு | Year:* ${student.year}
+📆 *தேதி | Date:* ${dayStr}, ${dateStr}
+🕐 *பீரியட் | Period:* ${period}
+
+━━━━━━━━━━━━━━━━━━━━
+📞 *தயவுசெய்து உடனடியாக கல்லூரியை தொடர்பு கொள்ளுங்கள்.*
+Please contact the college immediately if this is unexpected.
+
+_This is an automated message from ${COLLEGE_NAME} Attendance System._`;
+};
+
+/**
+ * Create absence notification message (kept for backward compatibility)
+ */
+const createAbsenceMessage = (student, period, date) => {
+  return createAbsenceSMSMessage(student, period, date);
 };
 
 /**
@@ -174,12 +220,13 @@ const sendAbsentNotifications = async (absentStudents, staff) => {
   const results = { sms: [], whatsapp: [], successful: 0, failed: 0 };
 
   for (const { student, period, date } of absentStudents) {
-    const message = createAbsenceMessage(student, period, date);
+    const smsMessage = createAbsenceSMSMessage(student, period, date);
+    const whatsappMessage = createAbsenceWhatsAppMessage(student, period, date);
     const metadata = { studentId: student._id, rollNo: student.rollNo, studentName: student.name };
 
-    // Attempt Send
-    const smsRes = await sendSMS(student.parentPhone, message, metadata);
-    const waRes = await sendWhatsApp(student.parentPhone, message, metadata);
+    // Attempt Send — SMS gets short English, WhatsApp gets bilingual Tamil+English
+    const smsRes = await sendSMS(student.parentPhone, smsMessage, metadata);
+    const waRes = await sendWhatsApp(student.parentPhone, whatsappMessage, metadata);
 
     results.sms.push(smsRes);
     results.whatsapp.push(waRes);
@@ -200,5 +247,7 @@ module.exports = {
   sendWhatsApp,
   sendAbsentNotifications,
   sendCustomNotification,
-  createAbsenceMessage
+  createAbsenceMessage,
+  createAbsenceSMSMessage,
+  createAbsenceWhatsAppMessage
 };

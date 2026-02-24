@@ -46,6 +46,14 @@ router.post('/forgot-password', [
     body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email')
 ], authController.forgotPassword);
 
+// @route   POST /api/auth/verify-otp
+// @desc    Verify OTP (step 2 of forgot-password flow)
+// @access  Public
+router.post('/verify-otp', [
+    body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
+    body('otp').isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits')
+], authController.verifyOTP);
+
 // @route   POST /api/auth/reset-password
 // @desc    Reset password with token
 // @access  Public
