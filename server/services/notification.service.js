@@ -171,9 +171,9 @@ const createAbsenceSMSMessage = (student, period, date, classTeacherPhone, class
 Student: ${student.name} (Roll: ${student.rollNo}) was ABSENT in Period ${period} on ${dateStr}.`;
 
   if (classTeacherName && classTeacherPhone) {
-    msg += `\nClass Teacher: ${classTeacherName} | Contact: ${classTeacherPhone}`;
+    msg += `\nவகுப்பு ஆசிரியர் | Class Teacher: ${classTeacherName}, தொடர்பு | Contact: ${classTeacherPhone}`;
   } else if (classTeacherPhone) {
-    msg += `\nContact Class Teacher: ${classTeacherPhone}`;
+    msg += `\nவகுப்பு ஆசிரியர் | Class Teacher: ${classTeacherPhone}`;
   }
   return msg;
 };
@@ -209,7 +209,7 @@ Your ward was marked *ABSENT* today.
   if (classTeacherName && classTeacherPhone) {
     msg += `\n👩‍🏫 *வகுப்பு ஆசிரியர் | Class Teacher:* ${classTeacherName}\n📞 *தொடர்பு | Contact:* ${classTeacherPhone}`;
   } else if (classTeacherPhone) {
-    msg += `\n📞 *Class Teacher Contact:* ${classTeacherPhone}`;
+    msg += `\n📞 *வகுப்பு ஆசிரியர் Contact:* ${classTeacherPhone}`;
   }
 
   msg += `\n\n━━━━━━━━━━━━━━━━━━━━
