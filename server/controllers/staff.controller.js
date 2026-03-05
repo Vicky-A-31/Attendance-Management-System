@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const Student = require('../models/Student.model');
 const Attendance = require('../models/Attendance.model');
+const Staff = require('../models/Staff.model');
 const notificationService = require('../services/notification.service');
 
 // @desc    Get staff dashboard statistics
@@ -284,6 +285,28 @@ exports.markAttendance = async (req, res) => {
 
     // Send notifications to parents of absent students
     if (absentStudents.length > 0) {
+      // Find Class Monitor for each student's class
+      const classMonitors = {}; // cache by 'department-year'
+      
+      for (let i = 0; i < absentStudents.length; i++) {
+        const student = absentStudents[i].student;
+        const key = `${student.department}-${student.year}`;
+        if (classMonitors[key] === undefined) {
+          const monitor = await Staff.findOne({
+            'classMonitor.department': student.department,
+            'classMonitor.year': student.year,
+            isActive: true
+          }).select('name phone');
+          classMonitors[key] = monitor
+            ? { name: monitor.name, phone: monitor.phone }
+            : null;
+        }
+        if (classMonitors[key]) {
+          absentStudents[i].classTeacherPhone = classMonitors[key].phone;
+          absentStudents[i].classTeacherName = classMonitors[key].name;
+        }
+      }
+
       // Run notification service in background
       notificationService.sendAbsentNotifications(absentStudents, staff)
         .then((results) => {

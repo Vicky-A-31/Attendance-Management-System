@@ -54,6 +54,18 @@ const staffSchema = new mongoose.Schema({
             enum: ['1st Year', '2nd Year', '3rd Year']
         }
     }],
+    classMonitor: {
+        department: {
+            type: String,
+            required: false,
+            enum: ['BCA', 'MCA', 'BBA', 'MBA', 'B.Com', 'M.Com', 'BA Tamil', 'BA English', 'B.Sc Physics', 'B.Sc Mathematics', 'B.Sc Data Science', 'M.Sc Computer Science', 'MA Tamil', 'B.Com Bank Management', 'B.Com (CA)', 'Hospital Administration', 'B.Sc AI & ML', 'Other']
+        },
+        year: {
+            type: String,
+            required: false,
+            enum: ['1st Year', '2nd Year', '3rd Year']
+        }
+    },
     subjects: {
         type: [String],
         required: [true, 'Subjects are required'],

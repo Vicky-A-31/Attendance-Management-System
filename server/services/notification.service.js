@@ -158,23 +158,30 @@ const sendWhatsApp = async (to, message, metadata = {}) => {
 /**
  * Create SMS absence message (Bilingual: Tamil + English)
  */
-const createAbsenceSMSMessage = (student, period, date) => {
+const createAbsenceSMSMessage = (student, period, date, classTeacherPhone, classTeacherName) => {
   const dateStr = new Date(date).toLocaleDateString('en-IN', {
     day: '2-digit',
     month: 'short',
     year: 'numeric'
   });
-  return `${COLLEGE_NAME}
+  let msg = `${COLLEGE_NAME}
 வருகை இல்லாத அறிவிப்பு | Absence Alert:
 மாணவர்: ${student.name} (சேர்க்கை எண்: ${student.rollNo})
 இன்று (${dateStr}) Period ${period}-ல் வகுப்பில் கலந்துகொள்ளவில்லை.
 Student: ${student.name} (Roll: ${student.rollNo}) was ABSENT in Period ${period} on ${dateStr}.`;
+
+  if (classTeacherName && classTeacherPhone) {
+    msg += `\nClass Teacher: ${classTeacherName} | Contact: ${classTeacherPhone}`;
+  } else if (classTeacherPhone) {
+    msg += `\nContact Class Teacher: ${classTeacherPhone}`;
+  }
+  return msg;
 };
 
 /**
  * Create WhatsApp absence message (Bilingual: Tamil + English)
  */
-const createAbsenceWhatsAppMessage = (student, period, date) => {
+const createAbsenceWhatsAppMessage = (student, period, date, classTeacherPhone, classTeacherName) => {
   const dateStr = new Date(date).toLocaleDateString('en-IN', {
     day: '2-digit',
     month: 'long',
@@ -182,7 +189,7 @@ const createAbsenceWhatsAppMessage = (student, period, date) => {
   });
   const dayStr = new Date(date).toLocaleDateString('en-IN', { weekday: 'long' });
 
-  return `🏫 *${COLLEGE_NAME}*
+  let msg = `🏫 *${COLLEGE_NAME}*
 ━━━━━━━━━━━━━━━━━━━━
 ⚠️ *வருகை இல்லாத அறிவிப்பு | Absence Alert*
 ━━━━━━━━━━━━━━━━━━━━
@@ -197,13 +204,21 @@ Your ward was marked *ABSENT* today.
 🏛️ *துறை | Department:* ${student.department}
 📅 *வகுப்பு ஆண்டு | Year:* ${student.year}
 📆 *தேதி | Date:* ${dayStr}, ${dateStr}
-🕐 *பீரியட் | Period:* ${period}
+🕐 *பீரியட் | Period:* ${period}`;
 
-━━━━━━━━━━━━━━━━━━━━
+  if (classTeacherName && classTeacherPhone) {
+    msg += `\n👩‍🏫 *வகுப்பு ஆசிரியர் | Class Teacher:* ${classTeacherName}\n📞 *தொடர்பு | Contact:* ${classTeacherPhone}`;
+  } else if (classTeacherPhone) {
+    msg += `\n📞 *Class Teacher Contact:* ${classTeacherPhone}`;
+  }
+
+  msg += `\n\n━━━━━━━━━━━━━━━━━━━━
 📞 *தயவுசெய்து உடனடியாக கல்லூரியை தொடர்பு கொள்ளுங்கள்.*
 Please contact the college immediately if this is unexpected.
 
 _This is an automated message from ${COLLEGE_NAME} Attendance System._`;
+
+  return msg;
 };
 
 /**
@@ -219,9 +234,9 @@ const createAbsenceMessage = (student, period, date) => {
 const sendAbsentNotifications = async (absentStudents, staff) => {
   const results = { sms: [], whatsapp: [], successful: 0, failed: 0 };
 
-  for (const { student, period, date } of absentStudents) {
-    const smsMessage = createAbsenceSMSMessage(student, period, date);
-    const whatsappMessage = createAbsenceWhatsAppMessage(student, period, date);
+  for (const { student, period, date, classTeacherPhone, classTeacherName } of absentStudents) {
+    const smsMessage = createAbsenceSMSMessage(student, period, date, classTeacherPhone, classTeacherName);
+    const whatsappMessage = createAbsenceWhatsAppMessage(student, period, date, classTeacherPhone, classTeacherName);
     const metadata = { studentId: student._id, rollNo: student.rollNo, studentName: student.name };
 
     // Attempt Send — SMS gets short English, WhatsApp gets bilingual Tamil+English

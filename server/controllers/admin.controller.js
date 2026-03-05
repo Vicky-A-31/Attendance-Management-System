@@ -708,6 +708,21 @@ exports.createStaff = async (req, res) => {
       });
     }
 
+    // Check if class Monitor already assigned
+    if (req.body.classMonitor && req.body.classMonitor.department && req.body.classMonitor.year) {
+      const existingMonitor = await Staff.findOne({
+        'classMonitor.department': req.body.classMonitor.department,
+        'classMonitor.year': req.body.classMonitor.year,
+        isActive: true
+      });
+      if (existingMonitor) {
+        return res.status(400).json({
+          success: false,
+          error: `Class ${req.body.classMonitor.department} - ${req.body.classMonitor.year} is already monitored by ${existingMonitor.name}`,
+        });
+      }
+    }
+
     // Set default password if not provided
     const staffDataToCreate = { ...req.body };
     if (!staffDataToCreate.password) {
@@ -766,6 +781,22 @@ exports.updateStaff = async (req, res) => {
       }
     }
 
+    // Check if class Monitor already assigned
+    if (req.body.classMonitor && req.body.classMonitor.department && req.body.classMonitor.year) {
+      const existingMonitor = await Staff.findOne({
+        _id: { $ne: req.params.id },
+        'classMonitor.department': req.body.classMonitor.department,
+        'classMonitor.year': req.body.classMonitor.year,
+        isActive: true
+      });
+      if (existingMonitor) {
+        return res.status(400).json({
+          success: false,
+          error: `Class ${req.body.classMonitor.department} - ${req.body.classMonitor.year} is already monitored by ${existingMonitor.name}`,
+        });
+      }
+    }
+
     // Update fields
     const updateFields = [
       "name",
@@ -776,6 +807,7 @@ exports.updateStaff = async (req, res) => {
       "yearTaught",
       "assignments",
       "subjects",
+      "classMonitor",
       "isActive",
     ];
 

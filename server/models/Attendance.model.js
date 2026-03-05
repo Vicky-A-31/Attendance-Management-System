@@ -19,8 +19,8 @@ const attendanceSchema = new mongoose.Schema({
     period: {
         type: Number,
         required: [true, 'Period is required'],
-        min: [1, 'Period must be between 1 and 8'],
-        max: [8, 'Period must be between 1 and 8']
+        min: [1, 'Period must be between 1 and 5'],
+        max: [5, 'Period must be between 1 and 5']
     },
     status: {
         type: String,

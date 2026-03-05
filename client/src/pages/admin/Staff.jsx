@@ -38,6 +38,7 @@ export default function AdminStaff() {
     department: '',
     yearTaught: [],
     assignments: [{ department: '', yearTaught: [] }],
+    classMonitor: { department: '', year: '' },
     subjects: [''],
     address: '',
     isActive: true
@@ -115,6 +116,7 @@ export default function AdminStaff() {
         department: '',
         yearTaught: [],
         assignments: [{ department: '', yearTaught: [] }],
+        classMonitor: { department: '', year: '' },
         subjects: [''],
         address: '',
         isActive: true
@@ -129,6 +131,7 @@ export default function AdminStaff() {
         assignments: staffMember.assignments && staffMember.assignments.length > 0 
           ? staffMember.assignments 
           : [{ department: staffMember.department || '', yearTaught: staffMember.yearTaught || [] }],
+        classMonitor: staffMember.classMonitor || { department: '', year: '' },
         subjects: staffMember.subjects && staffMember.subjects.length > 0 ? staffMember.subjects : [''],
         address: staffMember.address || '',
         isActive: staffMember.isActive !== undefined ? staffMember.isActive : true
@@ -186,6 +189,19 @@ export default function AdminStaff() {
       if (submissionData.assignments.length > 0) {
         delete submissionData.department;
         delete submissionData.yearTaught;
+      }
+
+      if (
+        (submissionData.classMonitor.department && !submissionData.classMonitor.year) ||
+        (!submissionData.classMonitor.department && submissionData.classMonitor.year)
+      ) {
+        showMessage('error', 'Class Monitor must have both Department and Year selected, or neither.');
+        setSubmitLoading(false);
+        return;
+      }
+      
+      if (!submissionData.classMonitor.department && !submissionData.classMonitor.year) {
+        delete submissionData.classMonitor;
       }
 
       // In edit mode, if password is empty, don't send it
@@ -289,6 +305,17 @@ export default function AdminStaff() {
       [name]: type === 'checkbox' ? checked : value
     }));
     if (formErrors[name]) setFormErrors(prev => ({ ...prev, [name]: '' }));
+  };
+
+  const handleClassMonitorChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      classMonitor: {
+        ...prev.classMonitor,
+        [name]: value
+      }
+    }));
   };
 
   const handleAssignmentChange = (index, field, value) => {
@@ -725,6 +752,42 @@ export default function AdminStaff() {
                       ))}
                     </div>
                     {formErrors.assignments && <p className="error-message">{formErrors.assignments}</p>}
+                  </div>
+
+                  {/* Class Monitor Info */}
+                  <div className="md:col-span-2 space-y-4">
+                    <h3 className="text-lg font-semibold text-slate-700 border-l-4 border-amber-500 pl-2">Class Monitor (Optional)</h3>
+                    <p className="text-xs text-slate-500 -mt-2 mb-2">Assign this staff member to monitor a specific class. They will be the Class Teacher contact in parent notifications.</p>
+                    <div className="p-4 bg-amber-50/50 rounded-xl border border-amber-100">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <label className="label">Class Department</label>
+                          <select 
+                            name="department"
+                            value={formData.classMonitor?.department || ''} 
+                            onChange={handleClassMonitorChange}
+                            disabled={modalMode === 'view'}
+                            className="input"
+                          >
+                            <option value="">None</option>
+                            {departments.map(dept => <option key={dept} value={dept}>{dept}</option>)}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="label">Class Year</label>
+                          <select 
+                            name="year"
+                            value={formData.classMonitor?.year || ''} 
+                            onChange={handleClassMonitorChange}
+                            disabled={modalMode === 'view'}
+                            className="input"
+                          >
+                            <option value="">None</option>
+                            {years.map(year => <option key={year} value={year}>{year}</option>)}
+                          </select>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Address */}

@@ -10,6 +10,7 @@ export default function StaffAttendance() {
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [selectedYear, setSelectedYear] = useState('');
   const [isAttendanceMarked, setIsAttendanceMarked] = useState(false);
   
@@ -168,15 +169,10 @@ export default function StaffAttendance() {
         attendanceData
       });
 
-      setMessage({ 
-        type: 'success', 
-        text: 'Attendance marked successfully! Notifications sent to parents of absent students.' 
-      });
+      setShowSuccessModal(true);
 
-      // Reset form
-      setTimeout(() => {
-        setMessage(null);
-      }, 5000);
+      // Reset inline message
+      setMessage(null);
 
     } catch (error) {
       console.error('Error marking attendance:', error);
@@ -247,7 +243,7 @@ export default function StaffAttendance() {
                 className="input font-bold"
                 required
               >
-                {[1, 2, 3, 4, 5, 6, 7, 8].map(p => (
+                {[1, 2, 3, 4, 5].map(p => (
                   <option key={p} value={p}>Period {p}</option>
                 ))}
               </select>
@@ -313,14 +309,6 @@ export default function StaffAttendance() {
               <p className="text-xl font-black text-rose-600 tracking-tight">{absentCount}</p>
             </div>
           </div>
-
-          {/* Message */}
-          {message && (
-            <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'} mb-8`}>
-              <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
-              <span className="font-bold text-sm tracking-tight">{message.text}</span>
-            </div>
-          )}
 
           {/* Student List */}
           {loading ? (
@@ -418,10 +406,42 @@ export default function StaffAttendance() {
                   )}
                 </div>
               </button>
+
+              {/* Message — shown near submit button for errors only */}
+              {message && message.type !== 'info' && (
+                <div className={`mt-4 alert ${message.type === 'success' ? 'alert-success' : 'alert-danger'}`}>
+                  <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+                  <span className="font-bold text-sm tracking-tight">{message.text}</span>
+                </div>
+              )}
             </>
           )}
         </form>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+          <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 flex flex-col items-center text-center animate-fade-in">
+            {/* Animated checkmark */}
+            <div className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mb-5">
+              <CheckCircle className="w-11 h-11 text-emerald-500" />
+            </div>
+            <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-2">Attendance Saved!</h2>
+            <p className="text-slate-500 text-sm font-medium mb-1">Attendance has been marked successfully.</p>
+            <p className="text-slate-400 text-xs mb-7">Parents of absent students have been notified.</p>
+            <button
+              onClick={() => {
+                setShowSuccessModal(false);
+                loadExistingAttendance();
+              }}
+              className="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-black text-base tracking-tight transition-all duration-200 shadow-lg shadow-emerald-100 hover:shadow-emerald-200 hover:-translate-y-0.5 active:translate-y-0"
+            >
+              OK, Got It!
+            </button>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
