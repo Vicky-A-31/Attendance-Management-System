@@ -76,21 +76,6 @@ export default function NotificationLogs() {
           </button>
         </div>
 
-        {/* Info Box for Test Mode */}
-        <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl flex gap-3 animate-fade-in text-sm mb-6">
-          <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-            <Smartphone className="w-6 h-6 text-blue-600" />
-          </div>
-          <div className="flex-1">
-            <h4 className="font-bold text-blue-900">How to test without Twilio?</h4>
-            <p className="text-blue-800 opacity-90 leading-relaxed">
-              When Twilio credentials are not configured, the system automatically uses <strong>Test Mode</strong>. 
-              Instead of sending a real SMS, the message is logged below. You can verify the content, 
-              recipient phone number, and timing of every notification right here in the dashboard.
-            </p>
-          </div>
-        </div>
-
         {/* Logs Table */}
         <div className="card overflow-hidden">
           {loading && logs.length === 0 ? (
